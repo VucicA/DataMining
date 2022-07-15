@@ -1,24 +1,25 @@
 import tweepy
 import pymongo
 import config
+import json
 
-client = tweepy.Client(bearer_token=config.BEARER_TOKEN)
+mongoDB = pymongo.MongoClient(config.URL + ":" + config.PORT + "/")
+mydb = mongoDB.datamining
+mycol = mydb.TFC
 
-query = 'Toulouse -is:retweet'
+twitter = tweepy.Client(bearer_token=config.BEARER_TOKEN)
 
-response = client.search_recent_tweets(query=query, max_results=10)
+query = '"Toulouse FC" lang:fr -is:retweet'
+
+response = twitter.search_recent_tweets(query=query, max_results=10)
 
 tweets = response.data
 
 
-#for tweet in response.data:
-#    tweets.append(tweet)
-
-
-myclient = pymongo.MongoClient(config.URL + ":" + config.PORT + "/")
-
-mydb = myclient["dataming"]
-
-mycol = mydb["TFC"]
-
-mycol.insert_many(tweets)
+for tweet in tweets:
+    sendJson = {
+        'id' : tweet.id,
+        'text' : tweet.text
+    }
+    print(sendJson)
+    mycol.insert_one(sendJson)
