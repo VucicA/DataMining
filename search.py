@@ -4,31 +4,21 @@ import config
 
 client = tweepy.Client(bearer_token=config.BEARER_TOKEN)
 
-query = 'from:Toulouse FC -is:retweet'
+query = 'Toulouse -is:retweet'
 
-response = client.search_recent_tweets(query=query, max_results=100)
+response = client.search_recent_tweets(query=query, max_results=10)
 
-tweets = []
+tweets = response.data
 
 
-for tweet in response.data:
-    tweets.append(tweet)
+#for tweet in response.data:
+#    tweets.append(tweet)
 
 
 myclient = pymongo.MongoClient(config.URL + ":" + config.PORT + "/")
 
+mydb = myclient["dataming"]
 
-dblist = myclient.list_database_names()
-if "dataming" in dblist:
-    print("The database exists.")
-else :
-    mydb = myclient["dataming"]
+mycol = mydb["TFC"]
 
-
-collist = mydb.list_collection_names()
-if "TFC" in collist:
-  print("The collection exists.")
-else:
-    mycol = mydb["TFC"]
-
-mycol.insert_one(tweets)
+mycol.insert_many(tweets)
